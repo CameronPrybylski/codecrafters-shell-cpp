@@ -8,7 +8,7 @@
 
 Shell::Shell()
 {
-    builtins = {"echo", "exit", "type", "pwd"};
+    builtins = {"echo", "exit", "type", "pwd", "cd"};
     paths = {"/bin", "/tmp"};
     currDir = std::filesystem::current_path().string();
 }
@@ -65,6 +65,10 @@ bool Shell::HandleCommands(std::vector<std::string> commands)
     else if(command == "pwd")
     {
         std::cout << currDir << std::endl;
+    }
+    else if(command == "cd")
+    {
+        ChangeDir(input);
     }
     else
     {
@@ -179,6 +183,18 @@ bool Shell::Execute(std::string command, std::vector<std::string> args)
     return false;
 }
 
+void Shell::ChangeDir(std::string dirPath)
+{
+    std::filesystem::path newPath = dirPath;
+    if(std::filesystem::is_directory(newPath))
+    {
+        currDir = newPath;
+    }
+    else
+    {
+        std::cout << "cd: " << dirPath << ": No such file or directory" << std::endl;
+    }
+}
 void Shell::Run()
 {
     while(true)

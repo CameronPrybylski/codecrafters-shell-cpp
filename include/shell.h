@@ -15,6 +15,7 @@ public:
     void Path(std::string input);
     std::string PathTo(std::string input);
     bool Execute(std::string command, std::vector<std::string> args);
+    void ChangeDir(std::string dirPath);
     void CommandNotFound(std::string input);
     
     void Run();
