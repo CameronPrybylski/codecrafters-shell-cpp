@@ -1,6 +1,13 @@
 #include <iostream>
 #include <string>
 
+void echo()
+{
+  std::string input;
+  getline(std::cin >> std::ws, input);
+  std::cout << input << std::endl;
+}
+
 int main() {
   // Flush after every std::cout / std:cerr
   std::cout << std::unitbuf;
@@ -16,6 +23,12 @@ int main() {
     {
       break;
     }
+    else if(command == "echo")
+    {
+      echo();
+      continue;
+    }
+
     std::cout << command << ": " << "command not found" << std::endl;
   }
 }
