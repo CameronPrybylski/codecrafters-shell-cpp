@@ -13,7 +13,8 @@ public:
     void Echo(std::string input);
     void Type(std::string input);
     void Path(std::string input);
-    void PathTo(std::string input);
+    std::string PathTo(std::string input);
+    bool Execute(std::string command, std::vector<std::string> args);
     void CommandNotFound(std::string input);
     
     void Run();

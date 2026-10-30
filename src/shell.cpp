@@ -3,7 +3,8 @@
 #include <iostream>
 #include <sstream>
 #include <filesystem>
-#include <unistd.h>
+#include <unistd.h> // access()
+#include <cstdlib> // std::system
 
 Shell::Shell()
 {
@@ -62,7 +63,8 @@ bool Shell::HandleCommands(std::vector<std::string> commands)
     }
     else
     {
-        CommandNotFound(command);
+        if(!Execute(command, commands))
+            CommandNotFound(command);
     }
 
     return exit;
@@ -87,7 +89,15 @@ void Shell::Type(std::string input)
     }
     else
     {
-        PathTo(input);
+        std::string path = PathTo(input);
+        if(path != "")
+        {
+            std::cout << input << " is " << path << std::endl;
+        }
+        else
+        {
+            std::cout << input << ": not found" << std::endl;
+        }
     }
 }
 
@@ -113,14 +123,10 @@ void Shell::Path(std::string input)
                 path = "";
             }
         }
-        for(auto p : paths)
-        {
-            //std::cout << p << std::endl;
-        }
     }
 }
 
-void Shell::PathTo(std::string input)
+std::string Shell::PathTo(std::string input)
 {
     std::string path = "";
     bool found = false;
@@ -140,12 +146,14 @@ void Shell::PathTo(std::string input)
                     {
                         path = "/usr" + path;
                     }
+                    /*
                     if(access(fileName.c_str(), X_OK) == 0)
                     {
                         std::cout << path << std::endl;
                         found = true;
                         break;
                     }
+                    */
                 }
             }
         }
@@ -154,14 +162,24 @@ void Shell::PathTo(std::string input)
             break;
         }
     }
-    if(path != "")
+    return path;
+}
+
+bool Shell::Execute(std::string command, std::vector<std::string> args)
+{
+    std::string executableFile = command;
+    std::string path = PathTo(command);
+    args.erase(args.begin() + 0);
+    if(!path.empty() && access(path.c_str(), X_OK) == 0)
     {
-        std::cout << input << " is " << path << std::endl;
+        for(auto arg : args)
+        {
+            command += " " + arg;
+        }
+        std::system(command.c_str());
+        return true;
     }
-    else
-    {
-        std::cout << input << ": not found" << std::endl;
-    }
+    return false;
 }
 
 void Shell::Run()
