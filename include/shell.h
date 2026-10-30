@@ -12,9 +12,12 @@ public:
     bool HandleCommands(std::vector<std::string> commands);
     void Echo(std::string input);
     void Type(std::string input);
+    void Path(std::string input);
+    void PathTo(std::string input);
     void CommandNotFound(std::string input);
     
     void Run();
 private:
     std::set<std::string> builtins;
+    std::set<std::string> paths;
 };

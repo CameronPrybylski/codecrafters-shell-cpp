@@ -2,10 +2,12 @@
 
 #include <iostream>
 #include <sstream>
+#include <filesystem>
 
 Shell::Shell()
 {
     builtins = {"echo", "exit", "type"};
+    paths = {"/bin"};
 }
 
 std::vector<std::string> Shell::ParseInput()
@@ -53,6 +55,10 @@ bool Shell::HandleCommands(std::vector<std::string> commands)
     {
         Type(input);
     }
+    else if(command.find("PATH") != std::string::npos)
+    {
+        Path(command);
+    }
     else
     {
         CommandNotFound(command);
@@ -77,6 +83,75 @@ void Shell::Type(std::string input)
     if(builtins.contains(input))
     {
         std::cout << input << " is a shell builtin" << std::endl;
+    }
+    else
+    {
+        PathTo(input);
+    }
+}
+
+void Shell::Path(std::string input)
+{
+    std::string path;
+    size_t end = input.find("$PATH");
+    if(end != std::string::npos)
+    {
+        for(int i = 5; i < end; ++i)
+        {
+            if(input[i] != ':')
+            {
+                path += input[i];
+            }
+            else
+            {
+                paths.insert(path);
+                if(path == "/usr/bin")
+                {
+                    paths.insert("/bin");
+                }
+                path = "";
+            }
+        }
+        for(auto p : paths)
+        {
+            //std::cout << p << std::endl;
+        }
+    }
+}
+
+void Shell::PathTo(std::string input)
+{
+    std::string path = "";
+    bool found = false;
+    std::set<std::string>::iterator pathItr = paths.begin();
+    for(; pathItr != paths.end(); ++pathItr)
+    {
+        std::filesystem::path currPath = *pathItr;
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(currPath))
+        {
+            if(entry.is_regular_file())
+            {
+                std::string fileName = entry.path().filename().string();
+                if(fileName == input)
+                {
+                    path = entry.path();
+                    if(currPath.string() == "/bin")
+                    {
+                        path = "/usr" + path;
+                    }
+                    found = true;
+                    break;
+                }
+            }
+        }
+        if(found)
+        {
+            break;
+        }
+    }
+    if(path != "")
+    {
+        std::cout << input << " is " << path << std::endl;
     }
     else
     {

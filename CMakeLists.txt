@@ -12,3 +12,5 @@ add_executable(shell ${SOURCE_FILES}
 target_include_directories(shell PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include())
 
 target_link_libraries(shell PRIVATE readline)
+
+# cmake -S . -B build -D CMAKE_BUILD_TYPE=Debug
