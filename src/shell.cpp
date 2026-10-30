@@ -8,8 +8,9 @@
 
 Shell::Shell()
 {
-    builtins = {"echo", "exit", "type"};
+    builtins = {"echo", "exit", "type", "pwd"};
     paths = {"/bin", "/tmp"};
+    currDir = std::filesystem::current_path().string();
 }
 
 std::vector<std::string> Shell::ParseInput()
@@ -60,6 +61,10 @@ bool Shell::HandleCommands(std::vector<std::string> commands)
     else if(command.find("PATH") != std::string::npos)
     {
         Path(command);
+    }
+    else if(command == "pwd")
+    {
+        std::cout << currDir << std::endl;
     }
     else
     {
@@ -146,14 +151,6 @@ std::string Shell::PathTo(std::string input)
                     {
                         path = "/usr" + path;
                     }
-                    /*
-                    if(access(fileName.c_str(), X_OK) == 0)
-                    {
-                        std::cout << path << std::endl;
-                        found = true;
-                        break;
-                    }
-                    */
                 }
             }
         }

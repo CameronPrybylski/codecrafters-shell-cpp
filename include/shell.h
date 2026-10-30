@@ -21,4 +21,5 @@ public:
 private:
     std::set<std::string> builtins;
     std::set<std::string> paths;
+    std::string currDir;
 };
