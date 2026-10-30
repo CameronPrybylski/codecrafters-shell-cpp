@@ -3,11 +3,12 @@
 #include <iostream>
 #include <sstream>
 #include <filesystem>
+#include <unistd.h>
 
 Shell::Shell()
 {
     builtins = {"echo", "exit", "type"};
-    paths = {"/bin"};
+    paths = {"/bin", "/tmp"};
 }
 
 std::vector<std::string> Shell::ParseInput()
@@ -139,8 +140,12 @@ void Shell::PathTo(std::string input)
                     {
                         path = "/usr" + path;
                     }
-                    found = true;
-                    break;
+                    if(access(fileName.c_str(), X_OK) == 0)
+                    {
+                        std::cout << path << std::endl;
+                        found = true;
+                        break;
+                    }
                 }
             }
         }
