@@ -148,13 +148,18 @@ std::string Shell::PathTo(std::string input)
         {
             if(entry.is_regular_file())
             {
-                std::string fileName = entry.path().filename().string();
-                if(fileName == input)
+                auto status = entry.status();
+                auto permissions = status.permissions();
+                if((permissions & (std::filesystem::perms::owner_exec | std::filesystem::perms::group_exec | std::filesystem::perms::others_exec)) != std::filesystem::perms::none)
                 {
-                    path = entry.path();
-                    if(currPath.string() == "/bin")
+                    std::string fileName = entry.path().filename().string();
+                    if(fileName == input)
                     {
-                        path = "/usr" + path;
+                        path = entry.path();
+                        if(currPath.string() == "/bin")
+                        {
+                            path = "/usr" + path;
+                        }
                     }
                 }
             }
@@ -186,6 +191,34 @@ bool Shell::Execute(std::string command, std::vector<std::string> args)
 
 void Shell::ChangeDir(std::string dirPath)
 {
+    RelativePath(dirPath);
+    AbsolutePath(dirPath);
+    std::filesystem::path newPath = dirPath;
+    if(std::filesystem::is_directory(newPath))
+    {
+        currDir = newPath;
+    }
+    else
+    {
+        std::cout << "cd: " << dirPath << ": No such file or directory" << std::endl;
+    }
+}
+void Shell::Run()
+{
+    while(true)
+    {
+        std::cout << "$ ";
+        std::vector<std::string> commands = ParseInput();
+        bool exit = HandleCommands(commands);
+        if(exit)
+        {
+            break;
+        }
+    }
+}
+
+void Shell::RelativePath(std::string& dirPath)
+{
     if(dirPath.starts_with("./"))
     {
         dirPath = currDir + dirPath.substr(1, dirPath.length());
@@ -216,26 +249,12 @@ void Shell::ChangeDir(std::string dirPath)
             }
         }
     }
-    std::filesystem::path newPath = dirPath;
-    if(std::filesystem::is_directory(newPath))
-    {
-        currDir = newPath;
-    }
-    else
-    {
-        std::cout << "cd: " << dirPath << ": No such file or directory" << std::endl;
-    }
 }
-void Shell::Run()
+
+void Shell::AbsolutePath(std::string &dirPath)
 {
-    while(true)
+    if(dirPath == "~")
     {
-        std::cout << "$ ";
-        std::vector<std::string> commands = ParseInput();
-        bool exit = HandleCommands(commands);
-        if(exit)
-        {
-            break;
-        }
+        dirPath = std::getenv("HOME");
     }
 }

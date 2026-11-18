@@ -21,6 +21,9 @@ public:
     void CommandNotFound(std::string input);
     
     void Run();
+
+    void RelativePath(std::string& dirPath);
+    void AbsolutePath(std::string& dirPath);
 private:
     std::set<std::string> builtins;
     std::set<std::string> paths;
