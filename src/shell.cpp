@@ -11,6 +11,7 @@ Shell::Shell()
     builtins = {"echo", "exit", "type", "pwd", "cd"};
     paths = {"/bin", "/tmp"};
     currDir = std::filesystem::current_path().string();
+    //commands["echo"] = [this](std::vector<std::string>& input) { this->Echo(input); };
 }
 
 std::vector<std::string> Shell::ParseInput()
@@ -185,6 +186,36 @@ bool Shell::Execute(std::string command, std::vector<std::string> args)
 
 void Shell::ChangeDir(std::string dirPath)
 {
+    if(dirPath.starts_with("./"))
+    {
+        dirPath = currDir + dirPath.substr(1, dirPath.length());
+    }
+    else if(dirPath.starts_with("../"))
+    {
+        int count = 0;
+        while(!dirPath.empty() && dirPath.find("../") != std::string::npos)
+        {
+            size_t delim = dirPath.find("../");
+            if(delim != std::string::npos)
+            {
+                count += 1;
+                dirPath = dirPath.substr(delim + 3, dirPath.length());
+            }
+        }
+        std::string path = "";
+        for(int i = currDir.length() - 1; i >= 0; --i)
+        {
+            if(currDir[i] == '/')
+            {
+                --count;
+            }
+            if(count == 0)
+            {
+                dirPath = currDir.substr(0, i);
+                break;
+            }
+        }
+    }
     std::filesystem::path newPath = dirPath;
     if(std::filesystem::is_directory(newPath))
     {

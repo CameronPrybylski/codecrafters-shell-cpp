@@ -3,6 +3,8 @@
 #include <string>
 #include <set>
 #include <vector>
+#include <map>
+#include <functional>
 
 class Shell {
 public:
@@ -23,4 +25,6 @@ private:
     std::set<std::string> builtins;
     std::set<std::string> paths;
     std::string currDir;
+
+    std::map<std::string, std::function<void(std::vector<std::string>&)>> commands;
 };
