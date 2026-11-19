@@ -20,9 +20,9 @@ std::vector<std::string> Shell::ParseInput()
     getline(std::cin, input);
     std::vector<std::string> commands;
 
-    if(input.find("\'") != std::string::npos)
+    if(input.find("\'") != std::string::npos || input.find("\"") != std::string::npos)
     {
-        ParseSingleQuotes(input, commands);
+        ParseQuotes(input, commands);
     }
     else
     {
@@ -282,7 +282,7 @@ void Shell::ParseNormal(std::string &input, std::vector<std::string> &commands)
     commands = {command, parameters};
 }
 
-void Shell::ParseSingleQuotes(std::string &input, std::vector<std::string>& commands)
+void Shell::ParseQuotes(std::string &input, std::vector<std::string>& commands)
 {
     size_t commandDelim = input.find(" ");
     std::string command = "";
@@ -295,12 +295,26 @@ void Shell::ParseSingleQuotes(std::string &input, std::vector<std::string>& comm
         commands.push_back(command);
         input = input.substr(commandDelim + 1, input.length());
     }
+    if(input.find("\"") != std::string::npos)
+    {
+        ParseDoubleQuotes(input, commands, command);
+    }
+    else
+    {
+        ParseSingleQuotes(input, commands, command);
+    }
+}
+
+void Shell::ParseSingleQuotes(std::string &input, std::vector<std::string> &commands, std::string& command)
+{
     std::string newInput = "";
     std::string currInput = "";
     bool open = false;
+    char quote = '\'';
+    
     for(int i = 0; i < input.length(); ++i)
     {
-        if(input[i] == '\'')
+        if(input[i] == quote)
         {
             if(open)
             {
@@ -326,4 +340,53 @@ void Shell::ParseSingleQuotes(std::string &input, std::vector<std::string>& comm
         input = newInput;
     }
     commands.push_back(input);
+}
+
+void Shell::ParseDoubleQuotes(std::string &input, std::vector<std::string> &commands, std::string& command)
+{
+    std::string newInput = "";
+    std::string currInput = "";
+    bool open = false;
+    char quote = '\"';
+    
+    for(int i = 0; i < input.length(); ++i)
+    {
+        if(command == "cat")
+        {
+            newInput += input[i];
+        }
+        else
+        {
+            if(input[i] == quote)
+            {
+                if(open)
+                {
+                    open = false;
+                    newInput += currInput;
+                    if(i + 1 < input.length() && input[i+1] != '\"' && input[i-1] != '\"')
+                        currInput = " ";
+                    else
+                        currInput = "";
+                }
+                else
+                {
+                    open = true;
+                }
+                if(command != "cat")
+                    continue;
+            }
+            if(open || input[i] != ' ')
+                currInput += input[i];
+        }
+    }
+    if(!currInput.empty())
+    {
+        newInput += currInput;
+    }
+    if(!newInput.empty())
+    {
+        input = newInput;
+    }
+    commands.push_back(input);
+    
 }

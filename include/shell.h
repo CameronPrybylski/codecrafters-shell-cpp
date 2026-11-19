@@ -26,7 +26,9 @@ public:
     void RelativePath(std::string& dirPath);
     void AbsolutePath(std::string& dirPath);
 
-    void ParseSingleQuotes(std::string& input, std::vector<std::string>& commands);
+    void ParseQuotes(std::string& input, std::vector<std::string>& commands);
+    void ParseSingleQuotes(std::string& input, std::vector<std::string>& commands, std::string& command);
+    void ParseDoubleQuotes(std::string& input, std::vector<std::string>& commands, std::string& command);
     void ParseNormal(std::string& input, std::vector<std::string>& commands);
 private:
     std::set<std::string> builtins;
