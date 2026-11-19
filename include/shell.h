@@ -18,12 +18,16 @@ public:
     std::string PathTo(std::string input);
     bool Execute(std::string command, std::vector<std::string> args);
     void ChangeDir(std::string dirPath);
+    void Cat(std::string input);
     void CommandNotFound(std::string input);
     
     void Run();
 
     void RelativePath(std::string& dirPath);
     void AbsolutePath(std::string& dirPath);
+
+    void ParseSingleQuotes(std::string& input, std::vector<std::string>& commands);
+    void ParseNormal(std::string& input, std::vector<std::string>& commands);
 private:
     std::set<std::string> builtins;
     std::set<std::string> paths;

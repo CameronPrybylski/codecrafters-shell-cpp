@@ -18,19 +18,17 @@ std::vector<std::string> Shell::ParseInput()
 {
     std::string input;
     getline(std::cin, input);
-    std::istringstream iss(input);
     std::vector<std::string> commands;
-    std::string command;
-    iss >> command;
-    std::string parameters = "";
-    std::string parameter;
-    while(iss >> parameter)
+
+    if(input.find("\'") != std::string::npos)
     {
-        parameters += parameter + " ";
+        ParseSingleQuotes(input, commands);
     }
-    if(!parameters.empty())
-        parameters = parameters.substr(0, parameters.length() - 1);
-    commands = {command, parameters};
+    else
+    {
+        ParseNormal(input, commands);
+    }
+    
     return commands;
 }
 
@@ -70,6 +68,10 @@ bool Shell::HandleCommands(std::vector<std::string> commands)
     else if(command == "cd")
     {
         ChangeDir(input);
+    }
+    else if(command == "cat")
+    {
+        Cat(input);
     }
     else
     {
@@ -203,6 +205,11 @@ void Shell::ChangeDir(std::string dirPath)
         std::cout << "cd: " << dirPath << ": No such file or directory" << std::endl;
     }
 }
+void Shell::Cat(std::string input)
+{
+    std::string command = "cat " + input;
+    std::system(command.c_str());
+}
 void Shell::Run()
 {
     while(true)
@@ -257,4 +264,66 @@ void Shell::AbsolutePath(std::string &dirPath)
     {
         dirPath = std::getenv("HOME");
     }
+}
+
+void Shell::ParseNormal(std::string &input, std::vector<std::string> &commands)
+{
+    std::istringstream iss(input);
+    std::string command;
+    iss >> command;
+    std::string parameters = "";
+    std::string parameter;
+    while(iss >> parameter)
+    {
+        parameters += parameter + " ";
+    }
+    if(!parameters.empty())
+        parameters = parameters.substr(0, parameters.length() - 1);
+    commands = {command, parameters};
+}
+
+void Shell::ParseSingleQuotes(std::string &input, std::vector<std::string>& commands)
+{
+    size_t commandDelim = input.find(" ");
+    std::string command = "";
+    if(commandDelim != std::string::npos)
+    {
+        for(int i = 0; i < commandDelim; ++i)
+        {
+            command += input[i];
+        }
+        commands.push_back(command);
+        input = input.substr(commandDelim + 1, input.length());
+    }
+    std::string newInput = "";
+    std::string currInput = "";
+    bool open = false;
+    for(int i = 0; i < input.length(); ++i)
+    {
+        if(input[i] == '\'')
+        {
+            if(open)
+            {
+                open = false;
+                newInput += currInput;
+                currInput = "";
+            }
+            else
+            {
+                open = true;
+            }
+            if(command != "cat")
+                continue;
+        }
+        currInput += input[i];
+    }
+    if(!currInput.empty())
+    {
+        newInput += currInput;
+    }
+    if(!newInput.empty())
+    {
+        input = newInput;
+    }
+    commands.push_back(input);
 }
