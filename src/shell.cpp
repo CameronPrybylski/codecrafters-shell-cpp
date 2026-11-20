@@ -20,7 +20,11 @@ std::vector<std::string> Shell::ParseInput()
     getline(std::cin, input);
     std::vector<std::string> commands;
 
-    if(input.find("\'") != std::string::npos || input.find("\"") != std::string::npos)
+    if(input.find("\\") != std::string::npos)
+    {
+        ParseBackSlash(input, commands);
+    }
+    else if(input.find("\'") != std::string::npos || input.find("\"") != std::string::npos)
     {
         ParseQuotes(input, commands);
     }
@@ -28,6 +32,8 @@ std::vector<std::string> Shell::ParseInput()
     {
         ParseNormal(input, commands);
     }
+
+    //ParseBackSlash(input, commands);
     
     return commands;
 }
@@ -90,6 +96,10 @@ void Shell::CommandNotFound(std::string command)
 
 void Shell::Echo(std::string input)
 {
+    if(input.find("echo") != std::string::npos)
+    {
+        input = input.substr(5, input.length());
+    }
     std::cout << input << std::endl;
 }
 
@@ -282,6 +292,42 @@ void Shell::ParseNormal(std::string &input, std::vector<std::string> &commands)
     commands = {command, parameters};
 }
 
+void Shell::ParseBackSlash(std::string &input, std::vector<std::string>& commands)
+{
+    std::string newInput = "";
+    size_t space = input.find(" ");
+    std::string command = "";
+    if(space != std::string::npos)
+    {
+        for(int i = 0; i < space; ++i)
+        {
+            command += input[i];
+        }
+        input = input.substr(space + 1, input.length());
+        if(command == "cat")
+        {
+            commands.push_back(command);
+            commands.push_back(input);
+            return;
+        }
+    }
+    for(int i = 0; i < input.length(); ++i)
+    {
+        if(input[i] == '\\' && i + 1 < input.length())
+        {
+            newInput += input[i+1];
+            i += 1;
+        }
+        else
+        {
+            newInput += input[i];
+        }
+    }
+    input = newInput;
+    commands.push_back(command);
+    commands.push_back(input);
+}
+
 void Shell::ParseQuotes(std::string &input, std::vector<std::string>& commands)
 {
     size_t commandDelim = input.find(" ");
@@ -372,8 +418,8 @@ void Shell::ParseDoubleQuotes(std::string &input, std::vector<std::string> &comm
                 {
                     open = true;
                 }
-                if(command != "cat")
-                    continue;
+
+                continue;
             }
             if(open || input[i] != ' ')
                 currInput += input[i];

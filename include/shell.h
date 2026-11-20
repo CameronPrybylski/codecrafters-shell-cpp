@@ -30,6 +30,7 @@ public:
     void ParseSingleQuotes(std::string& input, std::vector<std::string>& commands, std::string& command);
     void ParseDoubleQuotes(std::string& input, std::vector<std::string>& commands, std::string& command);
     void ParseNormal(std::string& input, std::vector<std::string>& commands);
+    void ParseBackSlash(std::string& input, std::vector<std::string>& commands);
 private:
     std::set<std::string> builtins;
     std::set<std::string> paths;
