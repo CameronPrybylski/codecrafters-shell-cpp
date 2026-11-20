@@ -20,7 +20,8 @@ std::vector<std::string> Shell::ParseInput()
     getline(std::cin, input);
     std::vector<std::string> commands;
 
-    if(input.find("\\") != std::string::npos)
+    /*
+    if(input.find("\\") != std::string::npos) 
     {
         ParseBackSlash(input, commands);
     }
@@ -32,8 +33,19 @@ std::vector<std::string> Shell::ParseInput()
     {
         ParseNormal(input, commands);
     }
-
-    //ParseBackSlash(input, commands);
+    */
+    size_t commandEnd = input.find(" ");
+    if(commandEnd != std::string::npos)
+    {
+        std::string command = input.substr(0, commandEnd);
+        input = input.substr(commandEnd + 1, input.length());
+        commands.push_back(command);
+        commands.push_back(input);
+    }
+    else
+    {
+        commands.push_back(input);
+    }
     
     return commands;
 }
@@ -100,7 +112,9 @@ void Shell::Echo(std::string input)
     {
         input = input.substr(5, input.length());
     }
-    std::cout << input << std::endl;
+    input = "echo " + input;
+    std::system(input.c_str());
+    //std::cout << input << std::endl;
 }
 
 void Shell::Type(std::string input)
@@ -311,8 +325,18 @@ void Shell::ParseBackSlash(std::string &input, std::vector<std::string>& command
             return;
         }
     }
+    bool singleQuote = false;
+    if(input.find("\'"))
+    {
+        singleQuote = true;
+
+    }
     for(int i = 0; i < input.length(); ++i)
     {
+        if(singleQuote)
+        {
+            break;
+        }
         if(input[i] == '\\' && i + 1 < input.length())
         {
             newInput += input[i+1];
